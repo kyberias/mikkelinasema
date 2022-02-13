@@ -109,7 +109,7 @@
 
         div.pohjoiseenAjat {
             position: absolute;
-            top: 165px;
+            top: 160px;
             right: 65px;
             width:80px;
         }
@@ -123,7 +123,7 @@
 
         div.etelaanAjat {
             position: absolute;
-            top: 705px;
+            top: 698px;
             right: 65px;
             width: 80px;
         }
@@ -230,110 +230,135 @@
         function fetchDepartures() {
             var graphQlUrl = "https://rata.digitraffic.fi/api/v2/graphql/graphql";
 
-            var query = {
-                "query": "{\
-  trainsByStationAndQuantity(station: \"MI\", departingTrains: 200,\
-                    where: { and: [{ operator: { shortCode: { equals: \"vr\" } } },\
-                {trainType: {trainCategory :{name:{unequals:\"Cargo\"}}}},\
-                     { commuterLineid: { unequals: \"Z\" } }] },\
-                    orderBy: { trainNumber: DESCENDING }) {\
-                    trainNumber\
-                    trainType {\
-      name\
-      trainCategory { name }\
-        }\
-                    departureDate\
-                    commuterLineid\
-                    operator {\
-                        shortCode\
-                    }\
-                    timeTableRows {\
-                        type\
-                        trainStopping\
-                        station {\
-                            name\
-                            shortCode\
-                            uicCode\
-                        }\
-                        scheduledTime\
-                    }\
-                }}"
-            };
+            var trainsToNorth = [];
+            var trainsToSouth = [];
 
-            $.ajax(graphQlUrl, {
-                data: JSON.stringify(query),
-                contentType: 'application/json',
-                type: 'POST',
-                success: function (data) {
+            function updateDepartures(list, stationList, timeList) {
 
-                    var trainsToNorth = [];
-                    var trainsToSouth = [];
+                stationList.empty();
+                timeList.empty();
 
-                    function updateDepartures(list, stationList, timeList) {
+                $.each(list, function (i, destination) {
+                    stationList.append("<div class='asema'>" + destination.name + "</div>");
 
-                        stationList.empty();
-                        timeList.empty();
+                    var scheduledTime = new Date(destination.scheduledTime);
+                    var hours = scheduledTime.getHours();
+                    var minutes = scheduledTime.getMinutes().toString().padStart(2, '0');
 
-                        $.each(list, function (i, destination) {
-                            stationList.append("<div class='asema'>" + destination.name + "</div>");
-
-                            var scheduledTime = new Date(destination.scheduledTime);
-                            var hours = scheduledTime.getHours();
-                            var minutes = scheduledTime.getMinutes().toString().padStart(2, '0');
-
-                            if (destination.train[0] == 'S') {
-                                timeList.append("<div class='tunnit pendolino'>" + hours + "</div>");
-                                timeList.append("<div class='minuutit pendolino'>" + minutes + "</div>");
-                            } else {
-                                timeList.append("<div class='tunnit'>" + hours + "</div>");
-                                timeList.append("<div class='minuutit'>" + minutes + "</div>");
-                            }
-                        });
+                    if (destination.train[0] == 'S') {
+                        timeList.append("<div class='tunnit pendolino'>" + hours + "</div>");
+                        timeList.append("<div class='minuutit pendolino'>" + minutes + "</div>");
+                    } else {
+                        timeList.append("<div class='tunnit'>" + hours + "</div>");
+                        timeList.append("<div class='minuutit'>" + minutes + "</div>");
                     }
+                });
+            }
 
-                    $.each(data.data.trainsByStationAndQuantity, function (i, train) {
-                        var tableReversed = train.timeTableRows.reverse();
+            var today = new Date();
 
-                        $.each(train.timeTableRows, function (j, timeTableRow) {
-                            if (timeTableRow.station.shortCode == "MI" && timeTableRow.type == "DEPARTURE") {
+            function tomorrow() {
+                return new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+            }
 
-                                var destinationStation = tableReversed.find(timeTableRow =>
-                                    timeTableRow.type == "ARRIVAL" &&
-                                    timeTableRow.trainStopping &&
-                                    timeTableRow.station.shortCode != 'MI' &&
-                                    stations[timeTableRow.station.shortCode]);
+            function yesterday() {
+                return new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+            }
 
-                                if (destinationStation) {
-                                    var destination = stations[destinationStation.station.shortCode];
+            var days = [yesterday(), today, tomorrow()];
 
-                                    var toNorth = destination.latitude > mikkeli.latitude;
+            function renderTrains() {
+                var departureSort = (f, s) => { return f.scheduledTime - s.scheduledTime };
 
-                                    var list = toNorth ? trainsToNorth : trainsToSouth;
-                                    var time = new Date(timeTableRow.scheduledTime);
+                trainsToNorth = trainsToNorth.sort(departureSort).slice(0, 10);
+                trainsToSouth = trainsToSouth.sort(departureSort).slice(0, 11);
 
-                                    if (time > new Date()) {
-                                        list.push({
-                                            scheduledTime: time,
-                                            name: destination.stationName.split(' ')[0].toUpperCase(),
-                                            train: train.trainType.name + train.trainNumber
-                                        });
+                updateDepartures(trainsToNorth, $('#pohjoiseen'), $('#pohjoiseenAjat'));
+                updateDepartures(trainsToSouth, $('#etelaan'), $('#etelaanAjat'));
+
+                setTimeout(fetchStations, refreshInterval);
+            }
+
+            function loadNextDay() {
+
+                if (days.length == 0) {
+                    renderTrains();
+                    return;
+                }
+
+                var day = days.pop();
+
+                var query = {
+                    "query": "{\
+      trainsByDepartureDate(departureDate: \""+ (day.getFullYear() + "-" + (day.getMonth()+1).toString().padStart(2, '0') + "-" + day.getDate().toString().padStart(2, '0')) +"\", \
+        where: {and : [ { timeTableRows: { contains: { station: { shortCode: { equals:\"MI\"} } } } }, {trainType: {trainCategory :{name:{unequals:\"Cargo\"}}}} ]},\
+        ) {\
+                        trainNumber\
+                        trainType {\
+          name\
+          trainCategory { name }\
+            }\
+                        departureDate\
+                        commuterLineid\
+                        operator {\
+                            shortCode\
+                        }\
+                        timeTableRows {\
+                            type\
+                            trainStopping\
+                            station {\
+                                name\
+                                shortCode\
+                                uicCode\
+                            }\
+                            scheduledTime\
+                        }\
+                    }}"
+                };
+
+                $.ajax(graphQlUrl, {
+                    data: JSON.stringify(query),
+                    contentType: 'application/json',
+                    type: 'POST',
+                    success: function (data) {
+                        $.each(data.data.trainsByDepartureDate, function (i, train) {
+                            var tableReversed = train.timeTableRows.reverse();
+
+                            $.each(train.timeTableRows, function (j, timeTableRow) {
+                                if (timeTableRow.station.shortCode == "MI" && timeTableRow.type == "DEPARTURE") {
+
+                                    var destinationStation = tableReversed.find(timeTableRow =>
+                                        timeTableRow.type == "ARRIVAL" &&
+                                        timeTableRow.trainStopping &&
+                                        timeTableRow.station.shortCode != 'MI' &&
+                                        stations[timeTableRow.station.shortCode]);
+
+                                    if (destinationStation) {
+                                        var destination = stations[destinationStation.station.shortCode];
+
+                                        var toNorth = destination.latitude > mikkeli.latitude;
+
+                                        var list = toNorth ? trainsToNorth : trainsToSouth;
+                                        var time = new Date(timeTableRow.scheduledTime);
+
+                                        if (time > new Date()) {
+                                            list.push({
+                                                scheduledTime: time,
+                                                name: destination.stationName.split(' ')[0].toUpperCase(),
+                                                train: train.trainType.name + train.trainNumber
+                                            });
+                                        }
                                     }
                                 }
-                            }
+                            });
                         });
-                    });
 
-                    var departureSort = (f, s) => { return f.scheduledTime - s.scheduledTime };
+                        loadNextDay();
+                    }
+                });
+            }
 
-                    trainsToNorth.sort(departureSort);
-                    trainsToSouth.sort(departureSort);
-
-                    updateDepartures(trainsToNorth, $('#pohjoiseen'), $('#pohjoiseenAjat'));
-                    updateDepartures(trainsToSouth, $('#etelaan'), $('#etelaanAjat'));
-
-                    setTimeout(fetchStations, refreshInterval);
-                }
-            });
+            loadNextDay();
         }
 
         function fetchStations() {
