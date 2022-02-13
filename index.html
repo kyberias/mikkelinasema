@@ -32,7 +32,11 @@
         html {
             font-family: "Conduit ITC W04 Regular" !important;
             color: #050505;
-            /*font-weight: bold;*/
+        }
+
+        div.root {
+            zoom: 0.5;
+            -moz-transform: scale(0.5);
         }
 
         /*557x1262*/
@@ -43,10 +47,6 @@
             top: 0px;
             width: 557px;
             height: 1262px;
-            /*transform: matrix3d(0.760495, 0.0381999, 0, 3.62836e-05, -0.0934704, 0.782662, 0, -0.000192405, 0, 0, 1, 0, 119, 20, 0, 1);
-            transform-origin: 0px 0px;*/
-            /*transform: matrix3d(1.00872, -0.00353327, 0, -2.15443e-05, -0.0662127, 0.878065, 0, -5.38312e-05, 0, 0, 1, 0, 229, 164, 0, 1);
-            transform-origin: 0px 0px;*/
             transform: matrix3d(0.991462, -0.000614374, 0, -1.30962e-05, -0.0694203, 0.917436, 0, -5.45846e-05, 0, 0, 1, 0, 231, 183, 0, 1);
             transform-origin: 0px 0px;
         }
@@ -72,7 +72,6 @@
 
         div.asema {
             margin-left: 65px;
-            /*letter-spacing: 5px;*/
             font-size: 52px;
             float: none;
             clear: left;
@@ -84,7 +83,6 @@
         div.aika {
             margin-right: 50px;
             color: #151515;
-            /*letter-spacing: 5px;*/
             font-size: 57px;
             float: right;
             clear:right;
@@ -282,176 +280,9 @@
             });
         }
 
-        //alert("foobar");
         $(document).ready(function () {
 
             fetchStations();
-
-            return;
-            console.log("doc ready");
-
-            var selector = '#aikataulu' // Replace this with the selector for the element you want to make transformable
-
-
-            jQuery.getScript('http://ajax.googleapis.com/ajax/libs/jqueryui/1.13.1/jquery-ui.min.js', function () {
-                jQuery.getScript('http://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js', function () {
-
-                    (function () {
-                        var $, applyTransform, getTransform, makeTransformable;
-
-                        $ = jQuery;
-
-                        getTransform = function (from, to) {
-                            var A, H, b, h, i, k_i, lhs, rhs, _i, _j, _k, _ref;
-                            console.assert((from.length === (_ref = to.length) && _ref === 4));
-                            A = [];
-                            for (i = _i = 0; _i < 4; i = ++_i) {
-                                A.push([from[i].x, from[i].y, 1, 0, 0, 0, -from[i].x * to[i].x, -from[i].y * to[i].x]);
-                                A.push([0, 0, 0, from[i].x, from[i].y, 1, -from[i].x * to[i].y, -from[i].y * to[i].y]);
-                            }
-                            b = [];
-                            for (i = _j = 0; _j < 4; i = ++_j) {
-                                b.push(to[i].x);
-                                b.push(to[i].y);
-                            }
-                            h = numeric.solve(A, b);
-                            H = [[h[0], h[1], 0, h[2]], [h[3], h[4], 0, h[5]], [0, 0, 1, 0], [h[6], h[7], 0, 1]];
-                            for (i = _k = 0; _k < 4; i = ++_k) {
-                                lhs = numeric.dot(H, [from[i].x, from[i].y, 0, 1]);
-                                k_i = lhs[3];
-                                rhs = numeric.dot(k_i, [to[i].x, to[i].y, 0, 1]);
-                                console.assert(numeric.norm2(numeric.sub(lhs, rhs)) < 1e-9, "Not equal:", lhs, rhs);
-                            }
-                            return H;
-                        };
-
-                        applyTransform = function (element, originalPos, targetPos, callback) {
-                            var H, from, i, j, p, to;
-                            from = (function () {
-                                var _i, _len, _results;
-                                _results = [];
-                                for (_i = 0, _len = originalPos.length; _i < _len; _i++) {
-                                    p = originalPos[_i];
-                                    _results.push({
-                                        x: p[0] - originalPos[0][0],
-                                        y: p[1] - originalPos[0][1]
-                                    });
-                                }
-                                return _results;
-                            })();
-                            to = (function () {
-                                var _i, _len, _results;
-                                _results = [];
-                                for (_i = 0, _len = targetPos.length; _i < _len; _i++) {
-                                    p = targetPos[_i];
-                                    _results.push({
-                                        x: p[0] - originalPos[0][0],
-                                        y: p[1] - originalPos[0][1]
-                                    });
-                                }
-                                return _results;
-                            })();
-                            H = getTransform(from, to);
-                            $(element).css({
-                                'transform': "matrix3d(" + (((function () {
-                                    var _i, _results;
-                                    _results = [];
-                                    for (i = _i = 0; _i < 4; i = ++_i) {
-                                        _results.push((function () {
-                                            var _j, _results1;
-                                            _results1 = [];
-                                            for (j = _j = 0; _j < 4; j = ++_j) {
-                                                _results1.push(H[j][i].toFixed(20));
-                                            }
-                                            return _results1;
-                                        })());
-                                    }
-                                    return _results;
-                                })()).join(',')) + ")",
-                                'transform-origin': '0 0'
-                            });
-                            return typeof callback === "function" ? callback(element, H) : void 0;
-                        };
-
-                        makeTransformable = function (selector, callback) {
-                            return $(selector).each(function (i, element) {
-                                var controlPoints, originalPos, p, position;
-                                $(element).css('transform', '');
-                                controlPoints = (function () {
-                                    var _i, _len, _ref, _results;
-                                    _ref = ['left top', 'left bottom', 'right top', 'right bottom'];
-                                    _results = [];
-                                    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                                        position = _ref[_i];
-                                        _results.push($('<div>').css({
-                                            border: '3px solid black',
-                                            borderRadius: '3px',
-                                            cursor: 'move',
-                                            position: 'absolute',
-                                            zIndex: 100000
-                                        }).appendTo('body').position({
-                                            at: position,
-                                            of: element,
-                                            collision: 'none'
-                                        }));
-                                    }
-                                    return _results;
-                                })();
-                                originalPos = (function () {
-                                    var _i, _len, _results;
-                                    _results = [];
-                                    for (_i = 0, _len = controlPoints.length; _i < _len; _i++) {
-                                        p = controlPoints[_i];
-                                        _results.push([p.offset().left, p.offset().top]);
-                                    }
-                                    return _results;
-                                })();
-                                $(controlPoints).draggable({
-                                    start: (function (_this) {
-                                        return function () {
-                                            return $(element).css('pointer-events', 'none');
-                                        };
-                                    })(this),
-                                    drag: (function (_this) {
-                                        return function () {
-                                            return applyTransform(element, originalPos, (function () {
-                                                var _i, _len, _results;
-                                                _results = [];
-                                                for (_i = 0, _len = controlPoints.length; _i < _len; _i++) {
-                                                    p = controlPoints[_i];
-                                                    _results.push([p.offset().left, p.offset().top]);
-                                                }
-                                                return _results;
-                                            })(), callback);
-                                        };
-                                    })(this),
-                                    stop: (function (_this) {
-                                        return function () {
-                                            applyTransform(element, originalPos, (function () {
-                                                var _i, _len, _results;
-                                                _results = [];
-                                                for (_i = 0, _len = controlPoints.length; _i < _len; _i++) {
-                                                    p = controlPoints[_i];
-                                                    _results.push([p.offset().left, p.offset().top]);
-                                                }
-                                                return _results;
-                                            })(), callback);
-                                            return $(element).css('pointer-events', 'auto');
-                                        };
-                                    })(this)
-                                });
-                                return element;
-                            });
-                        };
-
-                        window.makeTransformable = makeTransformable
-
-                    }).call(this);
-
-                    makeTransformable(selector);
-
-                });
-            });
 
         });
     </script>
@@ -460,53 +291,32 @@
 
 <body>
 
- <img src="tauluttausta.jpg" style="position: absolute; float:left; left:0px; top:0px;"/>
+    <div class="root">
 
- <div id="aikataulu" class="aikataulu">
+        <img src="tauluttausta.jpg" style="position: absolute; float:left; left:0px; top:0px;" />
 
-     <div class="otsikko">HENKILÖJUNAT MIKKELISTÄ</div>
+        <div id="aikataulu" class="aikataulu">
 
-     <!--<div class="suunta">POHJOISEEN:</div>-->
+            <div class="otsikko">HENKILÖJUNAT MIKKELISTÄ</div>
+
+            <div class="pohjoiseen" id="pohjoiseen">
+            </div>
+
+            <div class="pohjoiseenAjat" id="pohjoiseenAjat">
+            </div>
 
 
-     <div class="pohjoiseen" id="pohjoiseen">
-         <!--         <div class="asema">JOENSUU</div>
-                 <div class="asema">KONTIOMÄKI</div>
-                 <div class="asema">PIEKSÄMÄKI</div>
-                 <div class="asema">PIEKSÄMÄKI</div>
-                 <div class="asema">IISALMI</div>
-                 <div class="asema">PIEKSÄMÄKI</div>
-                 <div class="asema">PIEKSÄMÄKI</div>
-                 <div class="asema">PIEKSÄMÄKI</div>
-                 <div class="asema">KUOPIO</div>-->
-     </div>
+            <div class="etelaan" id="etelaan">
+            </div>
 
-     <div class="pohjoiseenAjat" id="pohjoiseenAjat">
-     </div>
-
-     <!--<div class="suunta">ETELÄÄN:</div>-->
-
-     <div class="etelaan" id="etelaan">
-         <!--
-        <div class="asema">HELSINKI</div>
-        <div class="asema">HELSINKI</div>
-        <div class="asema">KOUVOLA</div>
-        <div class="asema">KOUVOLA</div>
-        <div class="asema">HELSINKI</div>
-        <div class="asema">KOUVOLA</div>
-        <div class="asema">KOUVOLA</div>
-        <div class="asema">KOUVOLA</div>
-        <div class="asema">HELSINKI</div>
-        <div class="asema">KOUVOLA</div>-->
-     </div>
-
-     <div class="etelaanAjat" id="etelaanAjat">
-     </div>
+            <div class="etelaanAjat" id="etelaanAjat">
+            </div>
 
 
 
- </div>
+        </div>
 
+    </div>
 
 </body>
 
