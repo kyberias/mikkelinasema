@@ -169,7 +169,36 @@
             left: 1022px;
             top: 374px;
             transform-origin: 4px 34px;
-            transform: rotate(16deg);
+            transform: rotate(0deg);
+        }
+
+        @keyframes ticktock {
+            0% {
+                transform: rotate(-5deg);
+            }
+
+            50% {
+                transform: rotate(5deg);
+            }
+
+            100% {
+                transform: rotate(-5deg);
+            }
+        }
+
+        #kelloetu {
+            position: absolute;
+            left: 930px;
+            top: 298px;
+        }
+
+        #heiluri {
+            position: absolute;
+            left: 988px;
+            top: 482px;
+            transform-origin: 27px -88px;
+            transform: rotate(11deg);
+            animation: ticktock 2s infinite ease-in-out;
         }
 
     </style>
@@ -362,6 +391,10 @@
 
         <img id="tuntiviisari" src="tuntiviisari.png" />
         <img id="minuuttiviisari" src="minuuttiviisari.png" />
+
+        <img id="heiluri" src="heiluri.png" />
+        <img id="kelloetu" src="kelloetu.png" />
+
     </div>
 
     <div class="credits">Kuva <a href="https://twitter.com/RistoNylund/status/1073552742101204998">Risto Nylund</a>, Aikataulutiedot <a href="https://www.fintraffic.fi">Fintraffic</a>, Toteutus <a href="https://github.com/kyberias">J. Haakana</a></div>
