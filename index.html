@@ -1,5 +1,6 @@
 <html>
 <head>
+    <title>Henkilöjunat Mikkelistä</title>
     <style>
 
         @font-face {
@@ -35,8 +36,17 @@
         }
 
         div.root {
+            position: absolute;
+            top: 30px;
+            left: 30px;
             zoom: 0.5;
             -moz-transform: scale(0.5);
+        }
+
+        div.credits {
+            position: absolute;
+            top: 800px;
+            left: 30px;
         }
 
         /*557x1262*/
@@ -155,6 +165,7 @@
 
     <script type="text/javascript">
 
+        var refreshInterval = 5 * 60000;
         var stations = {};
         var mikkeli;
 
@@ -202,6 +213,10 @@
                     var trainsToSouth = [];
 
                     function updateDepartures(list, stationList, timeList) {
+
+                        stationList.empty();
+                        timeList.empty();
+
                         $.each(list, function (i, destination) {
                             stationList.append("<div class='asema'>" + destination.name + "</div>");
 
@@ -224,7 +239,6 @@
 
                         $.each(train.timeTableRows, function (j, timeTableRow) {
                             if (timeTableRow.station.shortCode == "MI" && timeTableRow.type == "DEPARTURE") {
-                                console.log(timeTableRow.scheduledTime);
 
                                 var destinationStation = tableReversed.find(timeTableRow =>
                                     timeTableRow.type == "ARRIVAL" &&
@@ -234,7 +248,6 @@
 
                                 if (destinationStation) {
                                     var destination = stations[destinationStation.station.shortCode];
-                                    console.log(destination.name);
 
                                     var toNorth = destination.latitude > mikkeli.latitude;
 
@@ -260,6 +273,10 @@
 
                     updateDepartures(trainsToNorth, $('#pohjoiseen'), $('#pohjoiseenAjat'));
                     updateDepartures(trainsToSouth, $('#etelaan'), $('#etelaanAjat'));
+
+                    //console.log("departures updated.");
+
+                    setTimeout(fetchStations, refreshInterval);
                 }
             });
         }
@@ -317,6 +334,8 @@
         </div>
 
     </div>
+
+    <div class="credits">Kuva <a href="https://twitter.com/RistoNylund/status/1073552742101204998">Risto Nylund</a>, Aikataulutiedot <a href="https://www.fintraffic.fi">Fintraffic</a></div>
 
 </body>
 
