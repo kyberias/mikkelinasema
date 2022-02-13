@@ -156,6 +156,13 @@
             top: 700px;
         }
 
+        img.viisari {
+            image-rendering: optimizeSpeed;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
         #minuuttiviisari {
             position: absolute;
             left: 1021px;
@@ -201,6 +208,15 @@
             animation: ticktock 1s infinite ease-in-out;
         }
 
+        div.liiketunnistin {
+            background: #ff333333;
+            position: absolute;
+            width: 28px;
+            height: 22px;
+            left: 1019px;
+            top: 161px;
+        }
+
     </style>
 
 
@@ -228,7 +244,8 @@
         }
 
         function fetchDepartures() {
-            var graphQlUrl = "https://rata.digitraffic.fi/api/v2/graphql/graphql";
+
+            $('.liiketunnistin').show();
 
             var trainsToNorth = [];
             var trainsToSouth = [];
@@ -276,6 +293,7 @@
                 updateDepartures(trainsToNorth, $('#pohjoiseen'), $('#pohjoiseenAjat'));
                 updateDepartures(trainsToSouth, $('#etelaan'), $('#etelaanAjat'));
 
+                $('.liiketunnistin').hide();
                 setTimeout(fetchStations, refreshInterval);
             }
 
@@ -287,6 +305,8 @@
                 }
 
                 var day = days.pop();
+
+                var graphQlUrl = "https://rata.digitraffic.fi/api/v2/graphql/graphql";
 
                 var query = {
                     "query": "{\
@@ -362,6 +382,9 @@
         }
 
         function fetchStations() {
+
+            $('.liiketunnistin').show();
+
             var url = "https://rata.digitraffic.fi/api/v1/metadata/stations";
 
             $.getJSON(url, function (data) {
@@ -414,15 +437,17 @@
 
         </div>
 
-        <img id="tuntiviisari" src="tuntiviisari.png" />
-        <img id="minuuttiviisari" src="minuuttiviisari.png" />
+        <img id="tuntiviisari" class="viisari" src="tuntiviisari.png" />
+        <img id="minuuttiviisari" class="viisari" src="minuuttiviisari.png" />
 
         <img id="heiluri" src="heiluri.png" />
         <img id="kelloetu" src="kelloetu.png" />
+        <div class="liiketunnistin"></div>
 
     </div>
 
     <div class="credits">Kuva <a href="https://twitter.com/RistoNylund/status/1073552742101204998">Risto Nylund</a>, Aikataulutiedot <a href="https://www.fintraffic.fi">Fintraffic</a>, Toteutus <a href="https://github.com/kyberias">J. Haakana</a></div>
+
 
 </body>
 
