@@ -156,6 +156,22 @@
             top: 700px;
         }
 
+        #minuuttiviisari {
+            position: absolute;
+            left: 1021px;
+            top: 364px;
+            transform-origin: 5px 45px;
+            transform: rotate(45deg);
+        }
+
+        #tuntiviisari {
+            position: absolute;
+            left: 1022px;
+            top: 374px;
+            transform-origin: 4px 34px;
+            transform: rotate(16deg);
+        }
+
     </style>
 
 
@@ -165,12 +181,24 @@
 
     <script type="text/javascript">
 
+        var timeInterval = 2000;
         var refreshInterval = 5 * 60000;
         var stations = {};
         var mikkeli;
 
+        function updateHands() {
+            var now = new Date();
+
+            var hourDegrees = (now.getHours() % 12 * (360.0/12) + now.getMinutes() / 60.0 * (360.0 / 12));
+            $('#tuntiviisari').css('transform', 'rotate(' + hourDegrees + 'deg)');
+
+            var minuteDegrees = now.getMinutes() / 60.0 * 360.0;
+            $('#minuuttiviisari').css('transform', 'rotate(' + minuteDegrees + 'deg)');
+
+            setTimeout(updateHands, timeInterval);
+        }
+
         function fetchDepartures() {
-            var url = "https://rata.digitraffic.fi/api/v1/live-trains/station/MI?departing_trains=5&include_nonstopping=false";
             var graphQlUrl = "https://rata.digitraffic.fi/api/v2/graphql/graphql";
 
             var query = {
@@ -274,8 +302,6 @@
                     updateDepartures(trainsToNorth, $('#pohjoiseen'), $('#pohjoiseenAjat'));
                     updateDepartures(trainsToSouth, $('#etelaan'), $('#etelaanAjat'));
 
-                    //console.log("departures updated.");
-
                     setTimeout(fetchStations, refreshInterval);
                 }
             });
@@ -299,6 +325,7 @@
 
         $(document).ready(function () {
 
+            updateHands();
             fetchStations();
 
         });
@@ -333,9 +360,11 @@
 
         </div>
 
+        <img id="tuntiviisari" src="tuntiviisari.png" />
+        <img id="minuuttiviisari" src="minuuttiviisari.png" />
     </div>
 
-    <div class="credits">Kuva <a href="https://twitter.com/RistoNylund/status/1073552742101204998">Risto Nylund</a>, Aikataulutiedot <a href="https://www.fintraffic.fi">Fintraffic</a></div>
+    <div class="credits">Kuva <a href="https://twitter.com/RistoNylund/status/1073552742101204998">Risto Nylund</a>, Aikataulutiedot <a href="https://www.fintraffic.fi">Fintraffic</a>, Toteutus <a href="https://github.com/kyberias">J. Haakana</a></div>
 
 </body>
 
