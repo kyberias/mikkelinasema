@@ -135,7 +135,7 @@
             font-family: 'Barlow-Regular';
             text-align: right;
             width: 35px;
-            margin-bottom: -6px;
+            margin-bottom: -3px;
         }
 
         div.minuutit {
@@ -144,7 +144,7 @@
             clear: none;
             font-family: 'Barlow-Regular';
             margin-top: 12px;
-            margin-bottom: -6px;
+            margin-bottom: -3px;
         }
 
         div.pikajuna {
@@ -217,6 +217,12 @@
             top: 161px;
         }
 
+        img.kukka {
+            position: absolute;
+            left: 129px;
+            top: 1270px;
+        }
+
     </style>
 
 
@@ -274,21 +280,22 @@
 
             var today = new Date();
 
-            function tomorrow() {
-                return new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+            function nextDay(d) {
+                return new Date(d.getTime() + 24 * 60 * 60 * 1000);
             }
 
             function yesterday() {
                 return new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
             }
 
-            var days = [yesterday(), today, tomorrow()];
+            var tomorrow = nextDay(today);
+            var days = [yesterday(), today, tomorrow, nextDay(tomorrow)];
 
             function renderTrains() {
                 var departureSort = (f, s) => { return f.scheduledTime - s.scheduledTime };
 
-                trainsToNorth = trainsToNorth.sort(departureSort).slice(0, 10);
-                trainsToSouth = trainsToSouth.sort(departureSort).slice(0, 11);
+                trainsToNorth = trainsToNorth.sort(departureSort).slice(0, 9);
+                trainsToSouth = trainsToSouth.sort(departureSort).slice(0, 10);
 
                 updateDepartures(trainsToNorth, $('#pohjoiseen'), $('#pohjoiseenAjat'));
                 updateDepartures(trainsToSouth, $('#etelaan'), $('#etelaanAjat'));
@@ -436,6 +443,8 @@
 
 
         </div>
+
+        <img class="kukka" src="kukka.png"/>
 
         <img id="tuntiviisari" class="viisari" src="tuntiviisari.png" />
         <img id="minuuttiviisari" class="viisari" src="minuuttiviisari.png" />
