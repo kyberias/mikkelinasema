@@ -53,8 +53,10 @@
         div.aikataulu {
             position: absolute;
             float: left;
-            left: 0px;
-            top: 0px;
+            @-moz-document url-prefix() {
+                left: -237px;
+                top: -176px;
+            }
             width: 557px;
             height: 1262px;
             transform: matrix3d(0.991462, -0.000614374, 0, -1.30962e-05, -0.0694203, 0.917436, 0, -5.45846e-05, 0, 0, 1, 0, 231, 183, 0, 1);
@@ -455,8 +457,8 @@
 
     </div>
 
-    <div class="credits">Kuva <a href="https://twitter.com/RistoNylund/status/1073552742101204998">Risto Nylund</a>, 
-        Aikataulutiedot <a href="https://www.fintraffic.fi">Fintraffic</a>, 
+    <div class="credits">Kuva <a href="https://twitter.com/RistoNylund/status/1073552742101204998">Risto Nylund</a>,
+        Aikataulutiedot <a href="https://www.fintraffic.fi">Fintraffic</a>,
         Idea ja toteutus <a href="https://github.com/kyberias">J. Haakana</a>.</div>
 
 
